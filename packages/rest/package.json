@@ -28,6 +28,7 @@
     "@loopback/http-server": "^0.3.8",
     "@loopback/openapi-v3": "^0.13.2",
     "@loopback/openapi-v3-types": "^0.9.2",
+    "@loopback/phase": "^0.1.0",
     "@types/cors": "^2.8.3",
     "@types/express": "^4.11.1",
     "@types/http-errors": "^1.6.1",
