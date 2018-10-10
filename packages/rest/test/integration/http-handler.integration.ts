@@ -242,19 +242,11 @@ describe('HttpHandler', () => {
         .expect(200, {key: 'value'});
     });
 
-    it('rejects url-encoded request body', () => {
-      logErrorsExcept(415);
+    it('allows url-encoded request body', () => {
       return client
         .post('/show-body')
         .send('key=value')
-        .expect(415, {
-          error: {
-            message:
-              'Content-type application/x-www-form-urlencoded is not supported.',
-            name: 'UnsupportedMediaTypeError',
-            statusCode: 415,
-          },
-        });
+        .expect(200, {key: 'value'});
     });
 
     it('returns 400 for malformed JSON body', () => {

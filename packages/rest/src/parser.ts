@@ -29,11 +29,18 @@ const debug = debugModule('loopback:rest:parser');
 export const QUERY_NOT_PARSED = {};
 Object.freeze(QUERY_NOT_PARSED);
 
-// tslint:disable-next-line:no-any
-type MaybeBody = any | undefined;
+type RequestBody = {
+  // tslint:disable-next-line:no-any
+  value: any | undefined;
+  coercionRequired?: boolean;
+};
 
-const parseJsonBody: (req: IncomingMessage) => Promise<MaybeBody> = promisify(
+const parseJsonBody: (req: IncomingMessage) => Promise<RequestBody> = promisify(
   require('body/json'),
+);
+
+const parseFormBody: (req: IncomingMessage) => Promise<RequestBody> = promisify(
+  require('body/form'),
 );
 
 /**
@@ -78,29 +85,47 @@ export async function parseOperationArgs(
 async function loadRequestBodyIfNeeded(
   operationSpec: OperationObject,
   request: Request,
-): Promise<MaybeBody> {
-  if (!operationSpec.requestBody) return Promise.resolve();
+): Promise<RequestBody> {
+  if (!operationSpec.requestBody) return Promise.resolve({value: undefined});
 
   const contentType = getContentType(request);
   debug('Loading request body with content type %j', contentType);
+
+  if (
+    contentType &&
+    contentType.startsWith('application/x-www-form-urlencoded')
+  ) {
+    const body = await parseFormBody(request).catch((err: HttpError) => {
+      debug('Cannot parse request body %j', err);
+      err.statusCode = 400;
+      throw err;
+    });
+    // form parser returns an object with prototype
+    return {
+      value: Object.assign({}, body),
+      coercionRequired: true,
+    };
+  }
+
   if (contentType && !/json/.test(contentType)) {
     throw new HttpErrors.UnsupportedMediaType(
       `Content-type ${contentType} is not supported.`,
     );
   }
 
-  return await parseJsonBody(request).catch((err: HttpError) => {
+  const jsonBody = await parseJsonBody(request).catch((err: HttpError) => {
     debug('Cannot parse request body %j', err);
     err.statusCode = 400;
     throw err;
   });
+  return {value: jsonBody};
 }
 
 function buildOperationArguments(
   operationSpec: OperationObject,
   request: Request,
   pathParams: PathParameterValues,
-  body: MaybeBody,
+  body: RequestBody,
   globalSchemas: SchemasObject,
 ): OperationArgs {
   let requestBodyIndex: number = -1;
@@ -129,9 +154,11 @@ function buildOperationArguments(
   }
 
   debug('Validating request body - value %j', body);
-  validateRequestBody(body, operationSpec.requestBody, globalSchemas);
+  validateRequestBody(body.value, operationSpec.requestBody, globalSchemas, {
+    coerceTypes: body.coercionRequired,
+  });
 
-  if (requestBodyIndex > -1) paramArgs.splice(requestBodyIndex, 0, body);
+  if (requestBodyIndex > -1) paramArgs.splice(requestBodyIndex, 0, body.value);
   return paramArgs;
 }
 
