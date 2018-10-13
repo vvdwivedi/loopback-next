@@ -9,7 +9,7 @@ summary: LoopBack 4 Todo Application Tutorial - Putting it all together
 
 ### Putting it all together
 
-We've got all of our artifacts now, and they are all automatically bind to our
+We've got all of our artifacts now, and they are all automatically bound to our
 [Application](Application.md) so that LoopBack's
 [Dependency injection](Dependency-injection.md) system can tie it all together
 for us!

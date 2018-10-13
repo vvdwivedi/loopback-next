@@ -30,7 +30,7 @@ step. The `db` datasource shows up by its class name `DbDataSource` from the
 list of available datasources.
 
 ```sh
-| => lb4 repository
+lb4 repository
 ? Please select the datasource DbDatasource
 ? Select the model(s) you want to generate a repository Todo
    create src/repositories/todo.repository.ts

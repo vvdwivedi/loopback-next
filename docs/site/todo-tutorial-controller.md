@@ -61,8 +61,7 @@ about the route, verb and the format of the incoming request body:
 - `@post('/todos')` creates metadata for `@loopback/rest` so that it can
   redirect requests to this function when the path and verb match.
 - `@requestBody()` associates the OpenAPI schema for a Todo with the body of the
-  request so that LoopBack can validate the format of an incoming request
-  (**Note**: As of this writing, schematic validation is not yet functional).
+  request so that LoopBack can validate the format of an incoming request.
 
 Some additional things to note about this example:
 
