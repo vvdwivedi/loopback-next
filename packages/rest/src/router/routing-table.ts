@@ -72,6 +72,8 @@ export interface RestRouter {
    */
   find(request: Request): ResolvedRoute | undefined;
 
+  getStaticAssetsRouter(): ResolvedRoute;
+
   /**
    * List all routes
    */
@@ -180,10 +182,8 @@ export class RoutingTable {
       return found;
     }
 
-    debug('No route found for %s %s', request.method, request.path);
-    throw new HttpErrors.NotFound(
-      `Endpoint "${request.method} ${request.path}" not found.`,
-    );
+    const staticAssetsRouter = this._router.getStaticAssetsRouter();
+    return staticAssetsRouter;
   }
 }
 
@@ -290,7 +290,7 @@ export class Route extends BaseRoute {
     verb: string,
     path: string,
     public readonly spec: OperationObject,
-    protected readonly _handler: Function,
+    protected readonly _handler: Function, // <-- doesn't this Function have a signature?
   ) {
     super(verb, path, spec);
   }
