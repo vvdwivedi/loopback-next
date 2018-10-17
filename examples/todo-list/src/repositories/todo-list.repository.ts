@@ -9,9 +9,11 @@ import {
   HasManyRepositoryFactory,
   juggler,
   repository,
+  HasOneRepositoryFactory,
 } from '@loopback/repository';
-import {Todo, TodoList} from '../models';
+import {Todo, TodoList, TodoListImage} from '../models';
 import {TodoRepository} from './todo.repository';
+import {TodoListImageRepository} from './todo-list-image.repository';
 
 export class TodoListRepository extends DefaultCrudRepository<
   TodoList,
@@ -21,16 +23,26 @@ export class TodoListRepository extends DefaultCrudRepository<
     Todo,
     typeof TodoList.prototype.id
   >;
+  public readonly image: HasOneRepositoryFactory<
+    TodoListImage,
+    typeof TodoList.prototype.id
+  >;
 
   constructor(
     @inject('datasources.db') dataSource: juggler.DataSource,
-    @repository.getter(TodoRepository)
+    @repository.getter('TodoRepository')
     protected todoRepositoryGetter: Getter<TodoRepository>,
+    @repository.getter('TodoListImageRepository')
+    protected todoListImageRepositoryGetter: Getter<TodoListImageRepository>,
   ) {
     super(TodoList, dataSource);
     this.todos = this._createHasManyRepositoryFactoryFor(
       'todos',
       todoRepositoryGetter,
+    );
+    this.image = this._createHasOneRepositoryFactoryFor(
+      'image',
+      todoListImageRepositoryGetter,
     );
   }
 

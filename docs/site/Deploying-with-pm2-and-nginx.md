@@ -43,9 +43,9 @@ section of documentation for detailed instructions.
 
 ### pm2 setup
 
-> > You might find yourself in a situation in which you do not have access to
-> > the CLI to start your Node.js applications. In such a situation, pm2 must be
-> > added as a dependency and must be called with the start script.
+> You might find yourself in a situation in which you do not have access to the
+> CLI to start your Node.js applications. In such a situation, pm2 must be added
+> as a dependency and must be called with the start script.
 
 1. Generate an ecosystem.config.js template with:
 
@@ -55,7 +55,7 @@ section of documentation for detailed instructions.
 
 2. Modify the generated file to match loopback requirements:
 
-   {% include ecosystem.config.js content="/ecosystem.config.js" %}
+   {% include code-caption.html content="/ecosystem.config.js" %}
 
    ```javascript
    module.exports = {
