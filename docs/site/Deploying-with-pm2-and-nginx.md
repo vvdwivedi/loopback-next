@@ -1,0 +1,93 @@
+---
+lang: en
+title: 'Deploying with pm2 and nginx'
+keywords: LoopBack, pm2, nginx
+sidebar: lb4_sidebar
+permalink: /doc/en/lb4/deploying-with-pm2-and-nginx.html
+---
+
+This is a basic guide for deploying a LoopBack 4 (LB4) app using
+[pm2](https://www.npmjs.com/package/pm2) behind nginx reverse proxy.
+
+PM2 is a Production Runtime and Process Manager for Node.js applications with a
+built-in Load Balancer. It allows you to keep applications alive forever, to
+reload them without downtime and facilitate common Devops tasks.
+
+NGINX is open source software for web serving, reverse proxying, caching, load
+balancing, media streaming, and more. It started out as a web server designed
+for maximum performance and stability. In addition to its HTTP server
+capabilities, NGINX can also function as a proxy server for email (IMAP, POP3,
+and SMTP) and a reverse proxy and load balancer for HTTP, TCP, and UDP servers.
+
+**NOTE**: Production deployment is a detailed topic and explained with clarity
+in their respective documentations. Please refer [pm2 docs](https://pm2.io/doc/)
+and
+[nginx docs](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/)
+for detailed setup instructions. This guide assumes you have nginx setup
+already.
+
+## First steps
+
+Before we start with deployment, let's get our app ready. If you have loopback
+cli installed, run the following command to create a new app:
+
+```sh
+$ lb4 app
+```
+
+Refer to
+[getting started](https://loopback.io/doc/en/lb4/Getting-started.html#create-a-new-project)
+section of documentation for detailed instructions.
+
+You also need to have pm2 installed globally. If not you don't already have pm2
+installed, you can use the following command (you can also use yarn):
+
+```sh
+$ npm install pm2 -g
+```
+
+### Deployment
+
+1.  Build your app using the following command:
+
+```sh
+$ npm run build
+```
+
+This creates a dist folder which containes the transpiled code. At you app root
+level, you already have an `index.js` which can be user to run the application
+using pm2.
+
+2. Register and start your application with pm2 using following command at the
+   app root directory:
+
+```sh
+$ pm2 start index.js
+```
+
+Now you can visit [http://127.0.0.1:3000/](http://127.0.0.1:3000/) to check your
+newly deployed API.
+
+3. Configure nginx reverse proxy by adding following rule to your `nginx.conf`
+   file. If you are not using the default config file, adjust accordingly.
+
+```
+location /fooapi {
+  proxy_pass http://localhost:3000;
+  proxy_http_version 1.1;
+  proxy_set_header Upgrade $http_upgrade;
+  proxy_set_header Connection 'upgrade';
+  proxy_set_header Host $host;
+  proxy_cache_bypass $http_upgrade;
+}
+```
+
+All set! Now you can hit your localhost at `http://localhost/fooapi` (assuming
+nginx is listening to port 80) and your requests will be passed on to pm2
+process running your loopback application.
+
+**NOTE**: This is one of the many ways to expose your APIs. If you notice, there
+are three main components to this recipe. A node application, a process manager
+and a reverse proxy server. Since loopback is the node application in our
+context, this will be a constant thing. You can choose any process manager for
+node and any server instead of `pm2` and `nginx`.
