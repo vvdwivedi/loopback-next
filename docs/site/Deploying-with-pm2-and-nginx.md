@@ -28,6 +28,8 @@ already.
 
 ## First steps
 
+### Loopback app
+
 Before we start with deployment, let's get our app ready. If you have loopback
 cli installed, run the following command to create a new app:
 
@@ -39,36 +41,73 @@ Refer to
 [getting started](https://loopback.io/doc/en/lb4/Getting-started.html#create-a-new-project)
 section of documentation for detailed instructions.
 
-You also need to have pm2 installed globally. If not you don't already have pm2
-installed, you can use the following command (you can also use yarn):
+### pm2 setup
+
+> > You might find yourself in a situation in which you do not have access to
+> > the CLI to start your Node.js applications. In such a situation, pm2 must be
+> > added as a dependency and must be called with the start script.
+
+1. Generate an ecosystem.config.js template with:
 
 ```sh
-$ npm install pm2 -g
+$ pm2 init
+```
+
+2. Modify the generated file to match loopback requirements:
+
+```
+module.exports = {
+  apps : [{
+    name: 'MyAPI',
+    script: 'index.js',
+    instances: 1,
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G',
+    env: {
+      NODE_ENV: 'development'
+    },
+    env_production: {
+      NODE_ENV: 'production'
+    }
+  }]
+};
+```
+
+3. Add pm2 as a dependency to your projet using following command
+
+```sh
+$ npm install pm2 --save
+```
+
+Modify your `start` and add a `stop` script in `package.json` to look like this
+
+```
+{
+  "scripts": {
+    "start": "pm2 start ecosystem.config.js --env production"
+    "stop": "pm2 stop ecosystem.config.js --env production"
+  }
+}
 ```
 
 ### Deployment
 
-1.  Build your app using the following command:
+1. Register and start your application with pm2 using following command at the
+   app root directory:
 
 ```sh
-$ npm run build
+$ npm start
 ```
 
 This creates a dist folder which containes the transpiled code. At you app root
 level, you already have an `index.js` which can be user to run the application
 using pm2.
 
-2. Register and start your application with pm2 using following command at the
-   app root directory:
-
-```sh
-$ pm2 start index.js
-```
-
 Now you can visit [http://127.0.0.1:3000/](http://127.0.0.1:3000/) to check your
 newly deployed API.
 
-3. Configure nginx reverse proxy by adding following rule to your `nginx.conf`
+2. Configure nginx reverse proxy by adding following rule to your `nginx.conf`
    file. If you are not using the default config file, adjust accordingly.
 
 ```
@@ -82,9 +121,9 @@ location /fooapi {
 }
 ```
 
-All set! Now you can hit your localhost at `http://localhost/fooapi` (assuming
-nginx is listening to port 80) and your requests will be passed on to pm2
-process running your loopback application.
+All set! Now you can hit your localhost at `http://localhost:3000/fooapi`
+(assuming nginx is listening to port 80) and your requests will be passed on to
+pm2 process running your loopback application.
 
 **NOTE**: This is one of the many ways to expose your APIs. If you notice, there
 are three main components to this recipe. A node application, a process manager
