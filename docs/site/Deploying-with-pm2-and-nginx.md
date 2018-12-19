@@ -78,7 +78,7 @@ section of documentation for detailed instructions.
    };
    ```
 
-3. Add pm2 as a dependency to your projet using following command
+3. Add pm2 as a dependency to your project using following command
 
    ```sh
    $ npm install pm2 --save
@@ -105,7 +105,7 @@ section of documentation for detailed instructions.
    $ npm start
    ```
 
-   This creates a dist folder which containes the transpiled code. At you app
+   This creates a dist folder which containes the transpiled code. At your app's
    root level, you already have an `index.js` which can be user to run the
    application using pm2.
 
